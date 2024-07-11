@@ -12,4 +12,4 @@ For more information on `.mtsp`, visit [github.com/rafalkopiec/mtsp](https://git
 This component is designed to be used with `.usdz` scenes that have named entities - I've found good results by naming entities in [Reality Composer Pro](https://developer.apple.com/documentation/visionos/designing-realitykit-content-with-reality-composer-pro).
 
 By design, the names given back would ideally be unique (provided by the `.usdz` scene), and as such would allow you to program actions based on taps on entities.
-Through `.mtsp` principles, the `.mtsp` file (as of v1.1, unreleased) has links corresponding to entity names - much akin to HyperText in HTML.
+Through `.mtsp` principles, the `.mtsp` file (`v1.1.0+`) has links corresponding to entity names - much akin to HyperText in HTML.
