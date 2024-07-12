@@ -25,11 +25,24 @@ internal struct VisionOSARView: View {
         self.onTap = onTap
     }
 
+    @State private var entity: Entity?
+    @Environment(\.physicalMetrics) private var physicalMetrics
+    @State private var initialScale: Float?
+
     var body: some View {
-        RealityView { content in
-            if let entity = try? await Entity(contentsOf: modelURL) {
-                entity.generateCollisionShapes(recursive: true)
-                content.add(entity)
+        GeometryReader3D { geo in
+            RealityView { content in
+                if let entity = try? await Entity(contentsOf: modelURL) {
+                    self.entity = entity
+                    entity.generateCollisionShapes(recursive: true)
+                    if initialScale == nil {
+                        initialScale = entity.scale.max()
+                    }
+                    content.add(entity)
+                    scale(in: content, with: geo)
+                }
+            } update: { content in
+                scale(in: content, with: geo)
             }
         }
         .gesture(
@@ -39,6 +52,24 @@ internal struct VisionOSARView: View {
                     onTap(value.entity)
                 }
         )
+        .padding()
+    }
+
+    private func scale(in content: RealityViewContent, with geo: GeometryProxy3D) {
+        guard let entity else { return }
+        let size = content.convert(boundingBox: entity.visualBounds(relativeTo: nil), from: .scene, to: .local)
+        let viewSize = geo.size
+
+        let maxR = min(viewSize.width/2, viewSize.height/2)
+        let currentR = max(size.max.x/2, size.max.y/2)
+        if maxR.isNormal, maxR > 0, currentR.isNormal, currentR > 0, let initialScale {
+            let scale = Float(maxR/currentR) * initialScale
+            entity.setScale(.init(repeating: scale), relativeTo: nil)
+            let height = entity.visualBounds(relativeTo: nil).boundingRadius/2
+            if height.isNormal, height > 0 {
+                entity.transform.translation.y = -height
+            }
+        }
     }
 }
 #endif
